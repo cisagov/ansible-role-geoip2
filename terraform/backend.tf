@@ -1,10 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "cisa-cool-terraform-state"
+    bucket         = "ncats-terraform-state-storage"
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
-    key            = "skeleton-ansible-role-with-test-user/terraform.tfstate"
-    profile        = "cool-terraform-backend"
+    key            = "ansible-role-geoip2/terraform.tfstate"
     region         = "us-east-1"
   }
 }

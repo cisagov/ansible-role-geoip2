@@ -3,15 +3,15 @@ module "user" {
   source = "github.com/cisagov/molecule-iam-user-tf-module"
 
   providers = {
-    aws                                    = aws.users
-    aws.images-production-provisionaccount = aws.images_production_provisionaccount
-    aws.images-staging-provisionaccount    = aws.images_staging_provisionaccount
-    aws.images-production-ssm              = aws.images_production_ssm
-    aws.images-staging-ssm                 = aws.images_staging_ssm
+    aws                                    = aws
+    aws.images-production-provisionaccount = aws
+    aws.images-staging-provisionaccount    = aws
+    aws.images-production-ssm              = aws
+    aws.images-staging-ssm                 = aws
   }
 
-  entity         = "skeleton-ansible-role-with-test-user"
-  ssm_parameters = ["/github/personal_authorization_token"]
+  entity         = "ansible-role-geoip2"
+  ssm_parameters = ["/cyhy/core/geoip/license_key"]
 
   tags = var.tags
 }

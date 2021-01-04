@@ -1,21 +1,13 @@
-# skeleton-ansible-role-with-test-user #
+# ansible-role-geoip2 #
 
-[![GitHub Build Status](https://github.com/cisagov/skeleton-ansible-role-with-test-user/workflows/build/badge.svg)](https://github.com/cisagov/skeleton-ansible-role-with-test-user/actions)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/cisagov/skeleton-ansible-role-with-test-user.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cisagov/skeleton-ansible-role-with-test-user/alerts/)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/cisagov/skeleton-ansible-role-with-test-user.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cisagov/skeleton-ansible-role-with-test-user/context:python)
+[![GitHub Build Status](https://github.com/cisagov/ansible-role-geoip2/workflows/build/badge.svg)](https://github.com/cisagov/ansible-role-geoip2/actions)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/cisagov/ansible-role-geoip2.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cisagov/ansible-role-geoip2/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/cisagov/ansible-role-geoip2.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cisagov/ansible-role-geoip2/context:python)
 
-This is a skeleton project that can be used to quickly get a new
-[cisagov](https://github.com/cisagov) Ansible role GitHub project
-started, where that Ansible role requires an AWS test user for
-automated testing.
+An Ansible role for installing a
+[MaxMind GeoIP2 database](https://www.maxmind.com/en/geoip2-databases).
 
-This skeleton project contains [licensing information](LICENSE), as
-well as [pre-commit hooks](https://pre-commit.com) and [GitHub
-Actions](https://github.com/features/actions) configurations
-appropriate for an Ansible role, as well as the Terraform code to
-create the AWS test user.
-
-## Pre-requisites ##
+## Pre-requisites (Ignore Until the COOL Migration) ##
 
 In order to execute the Molecule tests for this Ansible role in GitHub
 Actions, a build user must exist in AWS. The accompanying Terraform
@@ -58,7 +50,7 @@ of the Project Setup README.
 
 If you have appropriate permissions for the repository you can view
 existing secrets on the [appropriate
-page](https://github.com/cisagov/skeleton-ansible-role-with-test-user/settings/secrets)
+page](https://github.com/cisagov/ansible-role-geoip2/settings/secrets)
 in the repository's settings.
 
 ## Requirements ##
@@ -82,15 +74,8 @@ Here's how to use it in a playbook:
   become: yes
   become_method: sudo
   roles:
-    - skeleton
+    - geoip2
 ```
-
-## New Repositories from a Skeleton ##
-
-Please see our [Project Setup guide](https://github.com/cisagov/development-guide/tree/develop/project_setup)
-for step-by-step instructions on how to start a new repository from
-a skeleton. This will save you time and effort when configuring a
-new repository!
 
 ## Contributing ##
 
@@ -112,4 +97,4 @@ with this waiver of copyright interest.
 
 ## Author Information ##
 
-First Last - <first.last@trio.dhs.gov>
+Nicholas McDonnell - <nicholas.mcdonnell@trio.dhs.gov>
