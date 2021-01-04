@@ -1,2 +1,73 @@
 ---
-# tasks file for geoip2
+
+# Download and extract the MaxMind GeoIP2 database.
+- name: Check the GeoIP database and replace if it is out of date
+  block:
+    - name: Set the full path for saving the database locally
+      set_fact:
+        geoip2_local_full_path: "{{ geoip2_local_path + geoip2_local_file }}"
+
+    - name: Set the remote database URL
+      set_fact:
+        remote_db_url: >-
+          {{
+            maxmind_url_format |
+            format(
+              maxmind_url_base,
+              maxmind_edition,
+              maxmind_suffix_file,
+              maxmind_license_key
+            )
+          }}
+
+    - name: Set the remote checksum URL
+      set_fact:
+        remote_checksum_url: >-
+          {{
+            maxmind_url_format |
+            format(
+              maxmind_url_base,
+              maxmind_edition,
+              maxmind_suffix_checksum,
+              maxmind_license_key
+            )
+          }}
+
+    - name: Retrieve the checksum of the latest remote version of the database
+      set_fact:
+        latest_version_checksum: "{{ lookup('url', remote_checksum_url) }}"
+
+    - name: Create the /usr/local/share/GeoIP/ directory
+      file:
+        mode: 0755
+        path: "{{ geoip2_local_path }}"
+        state: directory
+
+    - name: Check if the downloaded tar.gz file exists
+      stat:
+        path: "{{ geoip2_local_full_path }}"
+        checksum_algorithm: md5
+      register: tarball
+
+    - name: Check to see if the remote version is different from the local version
+      set_fact:
+        get_update: "{{ True if (not tarball.stat.exists or \
+        tarball.stat.checksum != latest_version_checksum) else False }}"
+
+    - name: Download, verify, and extract the latest database version if needed
+      block:
+        - name: Download GeoIP database and check (md5)
+          get_url:
+            url: "{{ remote_db_url }}"
+            dest: "{{ geoip2_local_full_path }}"
+            checksum: "md5:{{ latest_version_checksum }}"
+
+        - name: Extract GeoIP database
+          unarchive:
+            src: "{{ geoip2_local_full_path }}"
+            dest: "{{ geoip2_local_path }}"
+            remote_src: yes
+            extra_opts:
+              - "--strip-components=1"
+      when: get_update
+  when: maxmind_license_key | default(false)

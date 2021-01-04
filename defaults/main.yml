@@ -1,0 +1,11 @@
+---
+# Directory to store GeoIP files
+geoip2_local_path: "/usr/local/share/GeoIP/"
+geoip2_local_file: "GeoIP2-City.tar.gz"
+
+# Variables for a present license
+maxmind_url_format: "%s?edition_id=%s&suffix=%s&license_key=%s"
+maxmind_url_base: "https://download.maxmind.com/app/geoip_download"
+maxmind_edition: "GeoIP2-City"
+maxmind_suffix_file: "tar.gz"
+maxmind_suffix_checksum: "tar.gz.md5"
