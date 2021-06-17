@@ -12,6 +12,4 @@ module "user" {
 
   entity         = "ansible-role-geoip2"
   ssm_parameters = ["/cyhy/core/geoip/license_key"]
-
-  tags = var.tags
 }
