@@ -19,7 +19,7 @@ local machine.
 Before the build user can be created, the following profile must exist in
 your AWS credentials file:
 
-* `cool-terraform-backend`
+- `cool-terraform-backend`
 
 The easiest way to set up that profile is to use our
 [`aws-profile-sync`](https://github.com/cisagov/aws-profile-sync)
@@ -63,14 +63,14 @@ The majority of the variables defined in
 [`defaults/main.yml`](defaults/main.yml) are fine as provided, but this role
 requires the following variables:
 
-* `maxmind_license_key` - The MaxMind GeoIP2 license key to use when
+- `maxmind_license_key` - The MaxMind GeoIP2 license key to use when
   accessing the MaxMind servers.
 
 Additionally, the following variables may be useful to override:
 
-* `maxmind_edition` - The database edition to install.
-* `geoip_local_path` - The directory to extract the database into.
-* `geoip_local_file` - The filename used to store the downloaded database.
+- `maxmind_edition` - The database edition to install.
+- `geoip_local_path` - The directory to extract the database into.
+- `geoip_local_file` - The filename used to store the downloaded database.
 
 ## Dependencies ##
 
