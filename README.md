@@ -16,16 +16,19 @@ permissions. This only needs to be run once per project, per AWS
 account. This user can also be used to run the Molecule tests on your
 local machine.
 
-Before the build user can be created, the following profile must exist in
-your AWS credentials file:
+Before the build user can be created, you will need a profile in your
+AWS credentials file that allows you to read and write your remote
+Terraform state.  (You almost certainly do not want to use local
+Terraform state for this long-lived build user.)  If the build user is
+to be created in the CISA COOL environment, for example, then you will
+need the `cool-terraform-backend` profile.
 
-- `cool-terraform-backend`
-
-The easiest way to set up that profile is to use our
+The easiest way to set up the Terraform remote state profile is to
+make use of our
 [`aws-profile-sync`](https://github.com/cisagov/aws-profile-sync)
 utility. Follow the usage instructions in that repository before
-continuing with the next steps. Note that you will need to know where
-your team stores their remote profile data in order to use
+continuing with the next steps, and note that you will need to know
+where your team stores their remote profile data in order to use
 [`aws-profile-sync`](https://github.com/cisagov/aws-profile-sync).
 
 To create the build user, follow these instructions:
@@ -59,18 +62,15 @@ None.
 
 ## Role Variables ##
 
-The majority of the variables defined in
-[`defaults/main.yml`](defaults/main.yml) are fine as provided, but this role
-requires the following variables:
-
-- `maxmind_license_key` - The MaxMind GeoIP2 license key to use when
-  accessing the MaxMind servers.
-
-Additionally, the following variables may be useful to override:
-
-- `maxmind_edition` - The database edition to install.
-- `geoip_local_path` - The directory to extract the database into.
-- `geoip_local_file` - The filename used to store the downloaded database.
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| geoip_local_file | The filename used to store the downloaded database. | `GeoIP2-City.tar.gz` | No |
+| geoip_local_path | The directory to extract the database into. | `/usr/local/share/GeoIP/` | No |
+| maxmind_edition | The database edition to install. | `GeoIP2-City` | No |
+| maxmind_license_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |
+| maxmind_suffix_checksum | The suffix of the database checksum file to be downloaded. | `tar.gz.md5` | No |
+| maxmind_suffix_file | The suffix of the database file to be downloaded. | `tar.gz` | No |
+| maxmind_url_format | The format of the MaxMind URL, where the first `%s` represents `maxmind_url_base`, the second `%s` represents `maxmind_edition`, the third `%s` represents `maxmind_suffix_file` or `maxmind_suffix_checksum`, and the fourth `%s` represents `maxmind_license_key`. | `%s?edition_id=%s&suffix=%s&license_key=%s` | No |
 
 ## Dependencies ##
 
