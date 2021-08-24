@@ -62,25 +62,15 @@ None.
 
 ## Role Variables ##
 
-The majority of the variables defined in
-[`defaults/main.yml`](defaults/main.yml) are fine as provided, but this role
-requires the following variables:
-
-- `maxmind_license_key` - The MaxMind GeoIP2 license key to use when
-  accessing the MaxMind servers.
-
-Additionally, the following variables may be useful to override:
-
-- `maxmind_edition` - The database edition to install.
-- `geoip_local_path` - The directory to extract the database into.
-- `geoip_local_file` - The filename used to store the downloaded database.
-
-<!--
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| optional_variable | Describe its purpose. | `default_value` | No |
-| required_variable | Describe its purpose. | n/a | Yes |
--->
+| geoip_local_file | The filename used to store the downloaded database. | `GeoIP2-City.tar.gz` | No |
+| geoip_local_path | The directory to extract the database into. | `/usr/local/share/GeoIP/` | No |
+| maxmind_edition | The database edition to install. | `GeoIP2-City` | No |
+| maxmind_license_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |
+| maxmind_suffix_checksum | The suffix of the database checksum file to be downloaded. | `tar.gz.md5` | No |
+| maxmind_suffix_file | The suffix of the database file to be downloaded. | `tar.gz` | No |
+| maxmind_url_format | The format of the MaxMind URL, where the first `%s` represents `maxmind_url_base`, the second `%s` represents `maxmind_edition`, the third `%s` represents `maxmind_suffix_file` or `maxmind_suffix_checksum`, and the fourth `%s` represents `maxmind_license_key`. | `%s?edition_id=%s&suffix=%s&license_key=%s` | No |
 
 ## Dependencies ##
 
