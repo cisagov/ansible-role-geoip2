@@ -1,7 +1,9 @@
 ---
 - name: Converge
   hosts: all
-  roles:
-    - role: ansible-role-geoip2
-      vars:
-        maxmind_license_key: "{{ lookup('aws_ssm', '/cyhy/core/geoip/license_key', region='us-east-1') }}"
+  tasks:
+    - name: Include ansible-role-geoip2
+      ansible.builtin.include_role:
+        name: ansible-role-geoip2
+        vars:
+          maxmind_license_key: "{{ lookup('aws_ssm', '/cyhy/core/geoip/license_key', region='us-east-1') }}"
