@@ -40,13 +40,13 @@
   ansible.builtin.set_fact:
     latest_version_checksum: "{{ lookup('url', remote_checksum_url) }}"
 
-- name: Create the /usr/local/share/GeoIP/ directory
+- name: Create the local directory
   ansible.builtin.file:
     mode: 0755
     path: "{{ geoip2_local_path }}"
     state: directory
 
-- name: Check if the downloaded tar.gz file exists
+- name: Check if the local file exists
   ansible.builtin.stat:
     path: "{{ geoip2_local_full_path }}"
     checksum_algorithm: md5
