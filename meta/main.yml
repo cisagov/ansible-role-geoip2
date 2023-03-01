@@ -1,8 +1,9 @@
 ---
+dependencies: []
 galaxy_info:
   author: Nicholas McDonnell
-  description: Install (or update) MaxMind GeoIP2 database
   company: CISA Cyber Assessments
+  description: Install (or update) MaxMind GeoIP2 database
   galaxy_tags:
     - geoip2
   license: CC0
@@ -25,7 +26,6 @@ galaxy_info:
         - bookworm
     - name: Fedora
       versions:
-        - "35"
         - "36"
         - "37"
     - name: Ubuntu
@@ -34,5 +34,3 @@ galaxy_info:
         - focal
         - jammy
   role_name: geoip2
-
-dependencies: []
