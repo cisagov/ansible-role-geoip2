@@ -1,4 +1,10 @@
 ---
+# Install some necessary prerequisites
+- name: Install prerequisites
+  ansible.builtin.package:
+    name:
+      - gzip
+      - tar
 
 # Download and extract the MaxMind GeoIP2 database.
 - name: Check the GeoIP database and replace if it is out of date
