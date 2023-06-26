@@ -8,6 +8,7 @@
 
 # Download and extract the MaxMind GeoIP2 database.
 - name: Check the GeoIP database and replace if it is out of date
+  when: maxmind_license_key | default(false)
   block:
     - name: Set the full path for saving the database locally
       ansible.builtin.set_fact:
@@ -61,6 +62,7 @@
         tarball.stat.checksum != latest_version_checksum) else False }}"
 
     - name: Download, verify, and extract the latest database version if needed
+      when: get_update
       block:
         - name: Download GeoIP database and check (md5)
           ansible.builtin.get_url:
@@ -75,5 +77,3 @@
             remote_src: yes
             extra_opts:
               - "--strip-components=1"
-      when: get_update
-  when: maxmind_license_key | default(false)
