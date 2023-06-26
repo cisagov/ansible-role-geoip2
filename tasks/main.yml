@@ -8,7 +8,7 @@
 
 # Download and extract the MaxMind GeoIP2 database.
 - name: Check the GeoIP database and replace if it is out of date
-  when: maxmind_license_key | default(false)
+  when: geoip2_maxmind_license_key | default(false)
   block:
     - name: Set the full path for saving the database locally
       ansible.builtin.set_fact:
@@ -18,12 +18,12 @@
       ansible.builtin.set_fact:
         remote_db_url: >-
           {{
-            maxmind_url_format |
+            geoip2_maxmind_url_format |
             format(
-              maxmind_url_base,
-              maxmind_edition,
-              maxmind_suffix_file,
-              maxmind_license_key
+              geoip2_maxmind_url_base,
+              geoip2_maxmind_edition,
+              geoip2_maxmind_suffix_file,
+              geoip2_maxmind_license_key
             )
           }}
 
@@ -31,12 +31,12 @@
       ansible.builtin.set_fact:
         remote_checksum_url: >-
           {{
-            maxmind_url_format |
+            geoip2_maxmind_url_format |
             format(
-              maxmind_url_base,
-              maxmind_edition,
-              maxmind_suffix_checksum,
-              maxmind_license_key
+              geoip2_maxmind_url_base,
+              geoip2_maxmind_edition,
+              geoip2_maxmind_suffix_checksum,
+              geoip2_maxmind_license_key
             )
           }}
 

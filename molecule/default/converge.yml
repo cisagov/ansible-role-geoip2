@@ -6,4 +6,4 @@
       ansible.builtin.include_role:
         name: ansible-role-geoip2
       vars:
-        maxmind_license_key: "{{ lookup('aws_ssm', '/cyhy/core/geoip/license_key', region='us-east-1') }}"
+        geoip2_maxmind_license_key: "{{ lookup('aws_ssm', '/cyhy/core/geoip/license_key', region='us-east-1') }}"
