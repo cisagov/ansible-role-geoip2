@@ -67,6 +67,7 @@
         - name: Download GeoIP database and check (md5)
           ansible.builtin.get_url:
             url: "{{ remote_db_url }}"
+            mode: 0644
             dest: "{{ geoip2_local_full_path }}"
             checksum: "md5:{{ latest_version_checksum }}"
 
