@@ -48,8 +48,8 @@
 
 - name: Check if the local file exists
   ansible.builtin.stat:
-    path: "{{ geoip2_local_full_path }}"
     checksum_algorithm: md5
+    path: "{{ geoip2_local_full_path }}"
   register: tarball
 
 - name: Check to see if the remote version is different from the local version
@@ -62,15 +62,15 @@
   block:
     - name: Download GeoIP database and check (md5)
       ansible.builtin.get_url:
-        url: "{{ remote_db_url }}"
-        mode: 0644
-        dest: "{{ geoip2_local_full_path }}"
         checksum: "md5:{{ latest_version_checksum }}"
+        dest: "{{ geoip2_local_full_path }}"
+        mode: 0644
+        url: "{{ remote_db_url }}"
 
     - name: Extract GeoIP database
       ansible.builtin.unarchive:
-        src: "{{ geoip2_local_full_path }}"
         dest: "{{ geoip2_local_path }}"
-        remote_src: yes
         extra_opts:
           - "--strip-components=1"
+        remote_src: yes
+        src: "{{ geoip2_local_full_path }}"
