@@ -72,5 +72,5 @@
         dest: "{{ geoip2_local_path }}"
         extra_opts:
           - "--strip-components=1"
-        remote_src: yes
+        remote_src: true
         src: "{{ geoip2_local_full_path }}"
