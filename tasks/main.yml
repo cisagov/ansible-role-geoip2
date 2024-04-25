@@ -1,4 +1,10 @@
 ---
+- name: Verify that MaxMind information is provided
+  ansible.builtin.fail:
+    msg: This role requires a MaxMind account ID and license key.
+  when:
+    - geoip2_maxmind_account_id is not defined or geoip2_maxmind_license_key is not defined
+
 # Install some necessary prerequisites
 - name: Install prerequisites
   ansible.builtin.package:
