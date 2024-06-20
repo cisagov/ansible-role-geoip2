@@ -53,13 +53,13 @@
         | first
       }}
 
-- name: Create the local directory
+- name: Ensure the directory to store the database file exists
   ansible.builtin.file:
     mode: 0755
     path: "{{ geoip2_database_directory }}"
     state: directory
 
-- name: Check if the local file exists
+- name: Check if the database archive exists
   ansible.builtin.stat:
     checksum_algorithm: sha256
     path: "{{ geoip2_archive_full_path }}"
@@ -73,7 +73,7 @@
 - name: Download, verify, and extract the latest database version if needed
   when: get_update
   block:
-    - name: Download GeoIP database and check (md5)
+    - name: Download the database archive and verify the checksum
       ansible.builtin.get_url:
         checksum: sha256:{{ latest_version_checksum }}
         dest: "{{ geoip2_archive_full_path }}"
@@ -82,7 +82,7 @@
         url: "{{ remote_db_url }}"
         username: "{{ geoip2_maxmind_account_id }}"
 
-    - name: Extract GeoIP database
+    - name: Extract the database file
       ansible.builtin.unarchive:
         dest: "{{ geoip2_database_directory }}"
         extra_opts:
