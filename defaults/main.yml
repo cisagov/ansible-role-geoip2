@@ -1,7 +1,9 @@
 ---
+# Name to use for the downloaded database archive
+geoip2_archive_filename: GeoIP2-City.tar.gz
+
 # Directory to store GeoIP files
-geoip2_local_path: /usr/local/share/GeoIP/
-geoip2_local_file: GeoIP2-City.tar.gz
+geoip2_database_directory: /usr/local/share/GeoIP/
 
 # The current URL formats for database files and checksums are:
 # https://download.maxmind.com/geoip/databases/<database edition>/download?suffix=tar.gz

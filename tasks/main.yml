@@ -14,7 +14,7 @@
 
 - name: Set the full path for saving the database locally
   ansible.builtin.set_fact:
-    geoip2_local_full_path: "{{ geoip2_local_path + geoip2_local_file }}"
+    geoip2_archive_full_path: "{{ geoip2_database_directory + geoip2_archive_filename }}"
 
 - name: Set the remote database URL
   ansible.builtin.set_fact:
@@ -56,13 +56,13 @@
 - name: Create the local directory
   ansible.builtin.file:
     mode: 0755
-    path: "{{ geoip2_local_path }}"
+    path: "{{ geoip2_database_directory }}"
     state: directory
 
 - name: Check if the local file exists
   ansible.builtin.stat:
     checksum_algorithm: sha256
-    path: "{{ geoip2_local_full_path }}"
+    path: "{{ geoip2_archive_full_path }}"
   register: tarball
 
 - name: Check to see if the remote version is different from the local version
@@ -76,7 +76,7 @@
     - name: Download GeoIP database and check (md5)
       ansible.builtin.get_url:
         checksum: sha256:{{ latest_version_checksum }}
-        dest: "{{ geoip2_local_full_path }}"
+        dest: "{{ geoip2_archive_full_path }}"
         mode: 0644
         password: "{{ geoip2_maxmind_license_key }}"
         url: "{{ remote_db_url }}"
@@ -84,8 +84,8 @@
 
     - name: Extract GeoIP database
       ansible.builtin.unarchive:
-        dest: "{{ geoip2_local_path }}"
+        dest: "{{ geoip2_database_directory }}"
         extra_opts:
           - --strip-components=1
         remote_src: true
-        src: "{{ geoip2_local_full_path }}"
+        src: "{{ geoip2_archive_full_path }}"

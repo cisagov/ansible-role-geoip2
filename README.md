@@ -63,8 +63,8 @@ None.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| geoip2\_local\_file | The filename used to store the downloaded database. | `GeoIP2-City.tar.gz` | No |
-| geoip2\_local\_path | The directory to extract the database into. | `/usr/local/share/GeoIP/` | No |
+| geoip2\_archive\_filename | The filename to use for the downloaded database archive. | `GeoIP2-City.tar.gz` | No |
+| geoip2\_database\_directory | The directory to store the database files. | `/usr/local/share/GeoIP/` | No |
 | geoip2\_maxmind\_account\_id | The MaxMind account ID to use when accessing the MaxMind servers. | n/a | Yes |
 | geoip2\_maxmind\_edition | The database edition to install. | `GeoIP2-City` | No |
 | geoip2\_maxmind\_license\_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |
