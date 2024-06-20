@@ -63,12 +63,12 @@
   ansible.builtin.stat:
     checksum_algorithm: sha256
     path: "{{ geoip2_archive_full_path }}"
-  register: tarball
+  register: database_archive
 
 - name: Check to see if the remote version is different from the local version
   ansible.builtin.set_fact:
-    get_update: "{{ True if (not tarball.stat.exists or \
-    tarball.stat.checksum != latest_version_checksum) else False }}"
+    get_update: "{{ True if (not database_archive.stat.exists or \
+    database_archive.stat.checksum != latest_version_checksum) else False }}"
 
 - name: Download, verify, and extract the latest database version if needed
   when: get_update
