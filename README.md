@@ -63,14 +63,14 @@ None.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| geoip2_local_file | The filename used to store the downloaded database. | `GeoIP2-City.tar.gz` | No |
-| geoip2_local_path | The directory to extract the database into. | `/usr/local/share/GeoIP/` | No |
-| geoip2_maxmind_edition | The database edition to install. | `GeoIP2-City` | No |
-| geoip2_maxmind_license_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |
-| geoip2_maxmind_suffix_checksum | The suffix of the database checksum file to be downloaded. | `tar.gz.md5` | No |
-| geoip2_maxmind_suffix_file | The suffix of the database file to be downloaded. | `tar.gz` | No |
-| geoip2_maxmind_url_base | The base URL for MaxMind. | `https://download.maxmind.com/app/geoip_download` | No |
-| geoip2_maxmind_url_format | The format of the MaxMind URL, where the first `%s` represents `geoip2_maxmind_url_base`, the second `%s` represents `geoip2_maxmind_edition`, the third `%s` represents `geoip2_maxmind_suffix_file` or `geoip2_maxmind_suffix_checksum`, and the fourth `%s` represents `geoip2_maxmind_license_key`. | `%s?edition_id=%s&suffix=%s&license_key=%s` | No |
+| geoip2\_local\_file | The filename used to store the downloaded database. | `GeoIP2-City.tar.gz` | No |
+| geoip2\_local\_path | The directory to extract the database into. | `/usr/local/share/GeoIP/` | No |
+| geoip2\_maxmind\_account\_id | The MaxMind account ID to use when accessing the MaxMind servers. | n/a | Yes |
+| geoip2\_maxmind\_edition | The database edition to install. | `GeoIP2-City` | No |
+| geoip2\_maxmind\_license\_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |
+| geoip2\_maxmind\_suffix\_checksum | The suffix of the database checksum file to be downloaded. | `tar.gz.sha256` | No |
+| geoip2\_maxmind\_suffix\_file | The suffix of the database file to be downloaded. | `tar.gz` | No |
+| geoip2\_maxmind\_url\_base | The format of the MaxMind URL, where the first `%s` represents `geoip2_maxmind_edition` and the second `%s` represents `geoip2_maxmind_suffix_file` or `geoip2_maxmind_suffix_checksum`. | `https://download.maxmind.com/geoip/databases/%s/download?suffix=%s` | No |
 
 ## Dependencies ##
 

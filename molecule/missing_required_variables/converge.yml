@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Test the role in a scenario where it is expected to fail
+      block:
+        - name: Include ansible-role-geoip2
+          ansible.builtin.include_role:
+            name: ansible-role-geoip2
+      rescue:
+        - name: Verify expected failure
+          ansible.builtin.assert:
+            fail_msg: Expected failure did not occur
+            that:
+              - ansible_failed_task is defined
+              - ansible_failed_task.name == "Verify that MaxMind information is provided"
+              - ansible_failed_result is defined
+              - ansible_failed_result.changed is false
+              - ansible_failed_result.failed is true
