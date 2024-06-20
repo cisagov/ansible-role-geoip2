@@ -16,9 +16,9 @@
   ansible.builtin.set_fact:
     geoip2_archive_full_path: "{{ geoip2_database_directory + geoip2_archive_filename }}"
 
-- name: Set the remote database URL
+- name: Set the database URL
   ansible.builtin.set_fact:
-    remote_db_url: >-
+    database_url: >-
       {{
         geoip2_maxmind_url_base
         | format(
@@ -27,9 +27,9 @@
           )
       }}
 
-- name: Set the remote checksum URL
+- name: Set the checksum URL
   ansible.builtin.set_fact:
-    remote_checksum_url: >-
+    checksum_url: >-
       {{
         geoip2_maxmind_url_base
         | format(
@@ -45,7 +45,7 @@
       {{
         lookup(
           'url',
-          remote_checksum_url,
+          checksum_url,
           username=geoip2_maxmind_account_id,
           password=geoip2_maxmind_license_key
         )
@@ -79,7 +79,7 @@
         dest: "{{ geoip2_archive_full_path }}"
         mode: 0644
         password: "{{ geoip2_maxmind_license_key }}"
-        url: "{{ remote_db_url }}"
+        url: "{{ database_url }}"
         username: "{{ geoip2_maxmind_account_id }}"
 
     - name: Extract the database file
