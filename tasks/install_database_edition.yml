@@ -1,7 +1,15 @@
 ---
 - name: Set the full path for saving the database locally
   ansible.builtin.set_fact:
-    geoip2_archive_full_path: "{{ geoip2_database_directory + database_edition + '.' + geoip2_maxmind_suffix_file }}"
+    geoip2_archive_full_path: >-
+      {{
+        "%s/%s.%s"
+        | format(
+            geoip2_database_directory,
+            database_edition,
+            geoip2_maxmind_suffix_file
+          )
+      }}
 
 - name: Set the database URL
   ansible.builtin.set_fact:
