@@ -14,11 +14,11 @@
 
 - name: Set the full path for saving the database locally
   ansible.builtin.set_fact:
-    geoip2_local_full_path: "{{ geoip2_local_path + geoip2_local_file }}"
+    geoip2_archive_full_path: "{{ geoip2_database_directory + geoip2_archive_filename }}"
 
-- name: Set the remote database URL
+- name: Set the database URL
   ansible.builtin.set_fact:
-    remote_db_url: >-
+    database_url: >-
       {{
         geoip2_maxmind_url_base
         | format(
@@ -27,9 +27,9 @@
           )
       }}
 
-- name: Set the remote checksum URL
+- name: Set the checksum URL
   ansible.builtin.set_fact:
-    remote_checksum_url: >-
+    checksum_url: >-
       {{
         geoip2_maxmind_url_base
         | format(
@@ -45,7 +45,7 @@
       {{
         lookup(
           'url',
-          remote_checksum_url,
+          checksum_url,
           username=geoip2_maxmind_account_id,
           password=geoip2_maxmind_license_key
         )
@@ -53,39 +53,39 @@
         | first
       }}
 
-- name: Create the local directory
+- name: Ensure the directory in which to store the database file exists
   ansible.builtin.file:
     mode: 0755
-    path: "{{ geoip2_local_path }}"
+    path: "{{ geoip2_database_directory }}"
     state: directory
 
-- name: Check if the local file exists
+- name: Check if the database archive exists
   ansible.builtin.stat:
     checksum_algorithm: sha256
-    path: "{{ geoip2_local_full_path }}"
-  register: tarball
+    path: "{{ geoip2_archive_full_path }}"
+  register: database_archive
 
 - name: Check to see if the remote version is different from the local version
   ansible.builtin.set_fact:
-    get_update: "{{ True if (not tarball.stat.exists or \
-    tarball.stat.checksum != latest_version_checksum) else False }}"
+    get_update: "{{ True if (not database_archive.stat.exists or \
+    database_archive.stat.checksum != latest_version_checksum) else False }}"
 
 - name: Download, verify, and extract the latest database version if needed
   when: get_update
   block:
-    - name: Download GeoIP database and check (md5)
+    - name: Download the database archive and verify the checksum
       ansible.builtin.get_url:
         checksum: sha256:{{ latest_version_checksum }}
-        dest: "{{ geoip2_local_full_path }}"
+        dest: "{{ geoip2_archive_full_path }}"
         mode: 0644
         password: "{{ geoip2_maxmind_license_key }}"
-        url: "{{ remote_db_url }}"
+        url: "{{ database_url }}"
         username: "{{ geoip2_maxmind_account_id }}"
 
-    - name: Extract GeoIP database
+    - name: Extract the database file
       ansible.builtin.unarchive:
-        dest: "{{ geoip2_local_path }}"
+        dest: "{{ geoip2_database_directory }}"
         extra_opts:
           - --strip-components=1
         remote_src: true
-        src: "{{ geoip2_local_full_path }}"
+        src: "{{ geoip2_archive_full_path }}"
