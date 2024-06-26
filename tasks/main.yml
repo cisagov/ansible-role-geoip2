@@ -53,7 +53,7 @@
         | first
       }}
 
-- name: Ensure the directory to store the database file exists
+- name: Ensure the directory in which to store the database file exists
   ansible.builtin.file:
     mode: 0755
     path: "{{ geoip2_database_directory }}"
