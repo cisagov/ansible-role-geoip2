@@ -1,0 +1,80 @@
+---
+- name: Set the full path for saving the database locally
+  ansible.builtin.set_fact:
+    geoip2_archive_full_path: >-
+      {{
+        "%s/%s.%s"
+        | format(
+            geoip2_database_directory,
+            database_edition,
+            geoip2_maxmind_suffix_file
+          )
+      }}
+
+- name: Set the database URL
+  ansible.builtin.set_fact:
+    database_url: >-
+      {{
+        geoip2_maxmind_url_base
+        | format(
+            database_edition,
+            geoip2_maxmind_suffix_file
+          )
+      }}
+
+- name: Set the checksum URL
+  ansible.builtin.set_fact:
+    checksum_url: >-
+      {{
+        geoip2_maxmind_url_base
+        | format(
+            database_edition,
+            geoip2_maxmind_suffix_checksum
+          )
+      }}
+
+# The checksum file is in the format "checksum filename\n"
+- name: Retrieve the checksum of the latest remote version of the database
+  ansible.builtin.set_fact:
+    latest_version_checksum: >-
+      {{
+        lookup(
+          'url',
+          checksum_url,
+          username=geoip2_maxmind_account_id,
+          password=geoip2_maxmind_license_key
+        )
+        | split
+        | first
+      }}
+
+- name: Check if the database archive exists
+  ansible.builtin.stat:
+    checksum_algorithm: sha256
+    path: "{{ geoip2_archive_full_path }}"
+  register: database_archive
+
+- name: Check to see if the remote version is different from the local version
+  ansible.builtin.set_fact:
+    get_update: "{{ True if (not database_archive.stat.exists or \
+    database_archive.stat.checksum != latest_version_checksum) else False }}"
+
+- name: Download, verify, and extract the latest database version if needed
+  when: get_update
+  block:
+    - name: Download the database archive and verify the checksum
+      ansible.builtin.get_url:
+        checksum: sha256:{{ latest_version_checksum }}
+        dest: "{{ geoip2_archive_full_path }}"
+        mode: 0644
+        password: "{{ geoip2_maxmind_license_key }}"
+        url: "{{ database_url }}"
+        username: "{{ geoip2_maxmind_account_id }}"
+
+    - name: Extract the database file
+      ansible.builtin.unarchive:
+        dest: "{{ geoip2_database_directory }}"
+        extra_opts:
+          - --strip-components=1
+        remote_src: true
+        src: "{{ geoip2_archive_full_path }}"
