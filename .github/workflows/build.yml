@@ -195,6 +195,7 @@ jobs:
           - ubuntu-24-systemd
         scenario:
           - default
+          - install_geoipupdate
           - missing_required_variables
     steps:
       - id: harden-runner
