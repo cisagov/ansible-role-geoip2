@@ -1,0 +1,7 @@
+---
+- name: Install geoipupdate via dnf
+  ansible.builtin.dnf:
+    # The geoipupdate RPM is currently unsigned:
+    # https://github.com/maxmind/geoipupdate/issues/180
+    disable_gpg_check: true
+    name: "{{ geoipupdate_package_url }}"

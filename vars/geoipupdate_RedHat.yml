@@ -1,0 +1,11 @@
+---
+# A dictionary whose keys are values of the Ansible fact
+# ansible_architecture and whose values are the processor architecture for
+# which geoipupdate package is to be installed, as specified in the
+# geoipupdate package filename.
+architectures:
+  aarch64: arm64
+  x86_64: amd64
+
+# The geoipupdate package URL
+geoipupdate_package_url: https://github.com/maxmind/geoipupdate/releases/download/v{{ geoip2_geoipupdate_version }}/geoipupdate_{{ geoip2_geoipupdate_version }}_linux_{{ architectures[ansible_architecture] }}.rpm

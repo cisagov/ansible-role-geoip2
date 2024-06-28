@@ -4,7 +4,8 @@
 [![CodeQL](https://github.com/cisagov/ansible-role-geoip2/workflows/CodeQL/badge.svg)](https://github.com/cisagov/ansible-role-geoip2/actions/workflows/codeql-analysis.yml)
 
 An Ansible role for installing a
-[MaxMind GeoIP2 database](https://www.maxmind.com/en/geoip2-databases).
+[MaxMind GeoIP2 database](https://www.maxmind.com/en/geoip2-databases). It can
+also optionally install the [MaxMind `geoipupdate` tool](https://github.com/maxmind/geoipupdate).
 
 ## Pre-requisites (Ignore Until the COOL Migration) ##
 
@@ -64,6 +65,8 @@ None.
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | geoip2\_database\_directory | The directory in which to store the database files. | `/usr/local/share/GeoIP/` | No |
+| geoip2\_geoipupdate\_version | The version of `geoipupdate` to install. Note that this value should be quoted and must represent a release available in the maxmind/geoipupdate GitHub repository. | `"7.0.1"` | No |
+| geoip2\_install\_geoipupdate | Whether to install the `geoipupdate` tool. | `false` | No |
 | geoip2\_maxmind\_account\_id | The MaxMind account ID to use when accessing the MaxMind servers. | n/a | Yes |
 | geoip2\_maxmind\_editions | The list of database editions to install. | `[GeoIP2-City]` | No |
 | geoip2\_maxmind\_license\_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |
