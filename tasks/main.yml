@@ -54,3 +54,25 @@
         dest: /etc/GeoIP.conf
         mode: 0644
         src: GeoIP.conf.j2
+
+    - name: Set up automatic updates for GeoIP databases
+      when: geoip2_geoipupdate_auto_update
+      block:
+        - name: Write the geoipupdate SystemD service file
+          ansible.builtin.template:
+            dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.service
+            mode: 0644
+            src: geoipupdate.service.j2
+
+        - name: Write the geoipupdate SystemD timer file
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.timer
+            mode: 0644
+            src: geoipupdate.timer
+
+        - name: Start and enable the geoipupdate SystemD timer
+          ansible.builtin.systemd:
+            daemon_reload: true
+            enabled: true
+            name: "{{ geoip2_geoipupdate_service_name }}.timer"
+            state: started

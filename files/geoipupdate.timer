@@ -1,0 +1,10 @@
+[Unit]
+Description=Twice a week GeoIP update
+
+[Timer]
+OnCalendar=Wed,Sat America/New_York
+RandomizedDelaySec=3h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -40,3 +40,17 @@ def test_geoipupdate_binary(host):
     assert (
         "Database GeoIP2-City up to date" in cmd.stderr
     ), "Missing expected database update"
+
+
+def test_geoipupdate_auto_update(host):
+    """Test that geoipupdate auto-updating is correctly configured."""
+    for f in ["geoipupdate.service", "geoipupdate.timer"]:
+        assert host.file(f"/etc/systemd/system/{f}").exists
+        assert host.file(f"/etc/systemd/system/{f}").is_file
+        assert host.file(f"/etc/systemd/system/{f}").mode == 0o644
+        assert host.file(f"/etc/systemd/system/{f}").user == "root"
+        assert host.file(f"/etc/systemd/system/{f}").group == "root"
+
+    assert host.service("geoipupdate.service").exists
+    assert host.service("geoipupdate.timer").exists
+    assert host.service("geoipupdate.timer").is_enabled
