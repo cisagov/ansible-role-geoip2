@@ -65,10 +65,10 @@
             src: geoipupdate.service.j2
 
         - name: Write the geoipupdate SystemD timer file
-          ansible.builtin.copy:
+          ansible.builtin.template:
             dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.timer
             mode: 0644
-            src: geoipupdate.timer
+            src: geoipupdate.timer.j2
 
         - name: Start and enable the geoipupdate SystemD timer
           ansible.builtin.systemd:
