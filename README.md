@@ -6,7 +6,7 @@
 An Ansible role for installing a
 [MaxMind GeoIP2 database](https://www.maxmind.com/en/geoip2-databases). Additionally,
 it can install the [MaxMind `geoipupdate` tool](https://github.com/maxmind/geoipupdate)
-and add a SystemD service and timer to run the tool at regular intervals.
+and add a systemd service and timer to run the tool at regular intervals.
 
 ## Pre-requisites (Ignore Until the COOL Migration) ##
 
@@ -67,9 +67,9 @@ None.
 |----------|-------------|---------|----------|
 | geoip2\_database\_directory | The directory in which to store the database files. | `/usr/local/share/GeoIP/` | No |
 | geoip2\_geoipupdate\_auto\_update | Whether to configure automatic updates when `geoipupdate` is installed. | `true` | No |
-| geoip2\_geoipupdate\_service\_name | The name to use for the `geoipupdate` SystemD service and timer. | `geoipupdate` | No |
-| geoip2\_geoipupdate\_service\_timer\_on\_calendar | The calendar expression to use for the `geoipupdate` SystemD timer. | `Wed,Sat America/New_York` | No |
-| geoip2\_geoipupdate\_service\_timer\_randomized\_delay\_sec | The randomized delay in seconds to use for the `geoipupdate` SystemD timer. | `3h` | No |
+| geoip2\_geoipupdate\_service\_name | The name to use for the `geoipupdate` systemd service and timer. | `geoipupdate` | No |
+| geoip2\_geoipupdate\_service\_timer\_on\_calendar | The calendar expression to use for the `geoipupdate` systemd timer. | `Wed,Sat America/New_York` | No |
+| geoip2\_geoipupdate\_service\_timer\_randomized\_delay\_sec | The randomized delay in seconds to use for the `geoipupdate` systemd timer. | `3h` | No |
 | geoip2\_geoipupdate\_version | The version of `geoipupdate` to install. Note that this value should be quoted and must represent a release available in the maxmind/geoipupdate GitHub repository. | `"7.0.1"` | No |
 | geoip2\_install\_geoipupdate | Whether to install the `geoipupdate` tool. | `false` | No |
 | geoip2\_maxmind\_account\_id | The MaxMind account ID to use when accessing the MaxMind servers. | n/a | Yes |

@@ -19,10 +19,10 @@ geoip2_install_geoipupdate: false
 # it is treated as a string.
 geoip2_geoipupdate_version: "7.0.1"
 
-# Indicate if a SystemD service and timer should be added to automatically
+# Indicate if a systemd service and timer should be added to automatically
 # update the GeoIP database files when the geoipupdate tool is installed.
 geoip2_geoipupdate_auto_update: true
-# The name to use for the SystemD service and timer that automatically updates
+# The name to use for the systemd service and timer that automatically updates
 # the GeoIP database files.
 geoip2_geoipupdate_service_name: geoipupdate
 # Configure the timer that runs the geoipupdate service. The database update
