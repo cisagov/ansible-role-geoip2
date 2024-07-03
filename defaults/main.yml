@@ -10,3 +10,29 @@ geoip2_maxmind_editions:
   - GeoIP2-City
 geoip2_maxmind_suffix_file: tar.gz
 geoip2_maxmind_suffix_checksum: tar.gz.sha256
+
+# Indicate if MaxMind's geoipupdate tool (https://github.com/maxmind/geoipupdate)
+# should be installed and which version to install. Note that the version must
+# represent a release in the maxmind/geoipupdate GitHub repository.
+geoip2_install_geoipupdate: false
+# We do not want this to be treated as a numeric value so we quote it to ensure
+# it is treated as a string.
+geoip2_geoipupdate_version: "7.0.1"
+
+# Indicate if a systemd service and timer should be added to automatically
+# update the GeoIP database files when the geoipupdate tool is installed.
+geoip2_geoipupdate_auto_update: true
+# The name to use for the systemd service and timer that automatically updates
+# the GeoIP database files.
+geoip2_geoipupdate_service_name: geoipupdate
+# Configure the timer that runs the geoipupdate service. The database update
+# schedule at
+# https://support.maxmind.com/hc/en-us/articles/4408216129947-Download-and-Update-Databases#h_01G3XX402XKD3J1CMWKNKMDYYZ
+# indicates that most databases update on Tuesday and Friday as late as 23:59 EST.
+# Therefore, the default is to update the databases on Wednesdays and Saturdays
+# between 00:00 and 03:00 EST.
+geoip2_geoipupdate_service_timer_on_calendar: Wed,Sat America/New_York
+# This value must be a valid systemd.time time span value. Please see the
+# documentation for more information:
+# https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html
+geoip2_geoipupdate_service_timer_randomized_delay_sec: 3h

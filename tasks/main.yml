@@ -23,3 +23,56 @@
   loop: "{{ geoip2_maxmind_editions }}"
   loop_control:
     loop_var: database_edition
+
+- name: Install the geoipupdate tool
+  when: geoip2_install_geoipupdate
+  block:
+    - name: Load var file with package URL based on the OS type
+      ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - geoipupdate_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml
+            - geoipupdate_{{ ansible_distribution }}.yml
+            - geoipupdate_{{ ansible_os_family }}.yml
+          paths:
+            - "{{ role_path }}/vars"
+
+    - name: Load tasks file with install tasks based on the OS type
+      ansible.builtin.include_tasks: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - install_geoipupdate_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml
+            - install_geoipupdate_{{ ansible_distribution }}.yml
+            - install_geoipupdate_{{ ansible_os_family }}.yml
+          paths:
+            - "{{ role_path }}/tasks"
+
+    - name: Write the geoipupdate configuration file
+      ansible.builtin.template:
+        dest: /etc/GeoIP.conf
+        mode: 0644
+        src: GeoIP.conf.j2
+
+    - name: Set up automatic updates for GeoIP databases
+      when: geoip2_geoipupdate_auto_update
+      block:
+        - name: Write the geoipupdate systemd service file
+          ansible.builtin.template:
+            dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.service
+            mode: 0644
+            src: geoipupdate.service.j2
+
+        - name: Write the geoipupdate systemd timer file
+          ansible.builtin.template:
+            dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.timer
+            mode: 0644
+            src: geoipupdate.timer.j2
+
+        - name: Start and enable the geoipupdate systemd timer
+          ansible.builtin.systemd:
+            daemon_reload: true
+            enabled: true
+            name: "{{ geoip2_geoipupdate_service_name }}.timer"
+            state: started

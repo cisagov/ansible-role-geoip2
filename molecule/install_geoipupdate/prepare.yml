@@ -1,0 +1,28 @@
+---
+- name: Import upgrade playbook
+  ansible.builtin.import_playbook: upgrade.yml
+
+- name: Import externally-managed-python playbook
+  ansible.builtin.import_playbook: externally-managed-python.yml
+
+# We need timezone data loaded when the timer we add for automatically running
+# geoipupdate is loaded. In our Ubuntu Jammy image it is not, so we need to
+# install the tzdata package. Note that I verified that the tzdata package
+# would be installed on an actual Ubuntu Jammy system by checking the manifests
+# here:
+# https://releases.ubuntu.com/jammy/ubuntu-22.04.4-desktop-amd64.manifest
+# https://releases.ubuntu.com/jammy/ubuntu-22.04.4-live-server-amd64.manifest
+- name: Group hosts by OS distribution and major version
+  hosts: all
+  tasks:
+    - name: Group hosts by OS distribution
+      ansible.builtin.group_by:
+        key: os_{{ ansible_distribution }}_{{ ansible_distribution_release }}
+
+- name: Ubuntu Jammy-specific tasks
+  hosts: os_Ubuntu_jammy
+  tasks:
+    - name: Install tzdata
+      ansible.builtin.package:
+        name:
+          - tzdata

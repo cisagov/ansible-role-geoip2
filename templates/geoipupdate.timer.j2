@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodic GeoIP update
+
+[Timer]
+OnCalendar={{ geoip2_geoipupdate_service_timer_on_calendar }}
+RandomizedDelaySec={{ geoip2_geoipupdate_service_timer_randomized_delay_sec }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

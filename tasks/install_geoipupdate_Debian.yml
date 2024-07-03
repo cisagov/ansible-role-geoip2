@@ -1,0 +1,10 @@
+---
+- name: Download the geoipupdate Debian package
+  ansible.builtin.get_url:
+    dest: /tmp/geoipupdate.deb
+    mode: 0644
+    url: "{{ geoipupdate_package_url }}"
+
+- name: Install geoipupdate Debian package
+  ansible.builtin.apt:
+    deb: /tmp/geoipupdate.deb
