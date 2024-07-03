@@ -32,4 +32,7 @@ geoip2_geoipupdate_service_name: geoipupdate
 # Therefore, the default is to update the databases on Wednesdays and Saturdays
 # between 00:00 and 03:00 EST.
 geoip2_geoipupdate_service_timer_on_calendar: Wed,Sat America/New_York
+# This value must be a valid systemd.time time span value. Please see the
+# documentation for more information:
+# https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html
 geoip2_geoipupdate_service_timer_randomized_delay_sec: 3h
