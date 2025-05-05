@@ -13,6 +13,9 @@
             fail_msg: Expected failure did not occur
             that:
               - ansible_failed_task is defined
+              # yamllint complains about the length of this line, but
+              # there is no clean way to break it up.
+              # yamllint disable-line rule:line-length
               - ansible_failed_task.name == "Verify that MaxMind information is provided"
               - ansible_failed_result is defined
               - ansible_failed_result.changed is false
