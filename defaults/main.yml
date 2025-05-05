@@ -17,7 +17,7 @@ geoip2_maxmind_suffix_checksum: tar.gz.sha256
 geoip2_install_geoipupdate: false
 # We do not want this to be treated as a numeric value so we quote it to ensure
 # it is treated as a string.
-geoip2_geoipupdate_version: "7.0.1"
+geoip2_geoipupdate_version: 7.0.1
 
 # Indicate if a systemd service and timer should be added to automatically
 # update the GeoIP database files when the geoipupdate tool is installed.
