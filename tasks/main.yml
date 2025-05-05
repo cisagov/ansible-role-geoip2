@@ -14,7 +14,7 @@
 
 - name: Ensure the directory in which to store the database file exists
   ansible.builtin.file:
-    mode: 0755
+    mode: u=rwx,g=rx,o=rx
     path: "{{ geoip2_database_directory }}"
     state: directory
 
@@ -52,7 +52,7 @@
     - name: Write the geoipupdate configuration file
       ansible.builtin.template:
         dest: /etc/GeoIP.conf
-        mode: 0644
+        mode: u=rw,g=r,o=r
         src: GeoIP.conf.j2
 
     - name: Set up automatic updates for GeoIP databases
@@ -61,13 +61,13 @@
         - name: Write the geoipupdate systemd service file
           ansible.builtin.template:
             dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.service
-            mode: 0644
+            mode: u=rw,g=r,o=r
             src: geoipupdate.service.j2
 
         - name: Write the geoipupdate systemd timer file
           ansible.builtin.template:
             dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.timer
-            mode: 0644
+            mode: u=rw,g=r,o=r
             src: geoipupdate.timer.j2
 
         - name: Start and enable the geoipupdate systemd timer
