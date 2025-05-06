@@ -66,7 +66,7 @@
       ansible.builtin.get_url:
         checksum: sha256:{{ latest_version_checksum }}
         dest: "{{ geoip2_archive_full_path }}"
-        mode: 0644
+        mode: u=rw,g=r,o=r
         password: "{{ geoip2_maxmind_license_key }}"
         url: "{{ database_url }}"
         username: "{{ geoip2_maxmind_account_id }}"

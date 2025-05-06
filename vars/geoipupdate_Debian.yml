@@ -8,4 +8,8 @@ architectures:
   x86_64: amd64
 
 # The geoipupdate package URL
-geoipupdate_package_url: https://github.com/maxmind/geoipupdate/releases/download/v{{ geoip2_geoipupdate_version }}/geoipupdate_{{ geoip2_geoipupdate_version }}_linux_{{ architectures[ansible_architecture] }}.deb
+geoipupdate_package_url: >-
+  https://github.com/maxmind/geoipupdate/releases/download/v{{
+  geoip2_geoipupdate_version }}/geoipupdate_{{
+  geoip2_geoipupdate_version }}_linux_{{
+  architectures[ansible_architecture] }}.deb
