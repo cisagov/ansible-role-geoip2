@@ -1,6 +1,7 @@
 # ansible-role-geoip2 #
 
 [![GitHub Build Status](https://github.com/cisagov/ansible-role-geoip2/workflows/build/badge.svg)](https://github.com/cisagov/ansible-role-geoip2/actions)
+[![License](https://img.shields.io/github/license/cisagov/ansible-role-geoip2)](https://spdx.org/licenses/)
 [![CodeQL](https://github.com/cisagov/ansible-role-geoip2/workflows/CodeQL/badge.svg)](https://github.com/cisagov/ansible-role-geoip2/actions/workflows/codeql-analysis.yml)
 
 An Ansible role for installing a
