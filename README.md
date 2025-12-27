@@ -162,6 +162,9 @@ Here's how to use it in a playbook:
     - name: Download the MaxMind GeoIP2 database
       ansible.builtin.include_role:
         name: geoip2
+      vars:
+        geoip2_maxmind_account_id: <valid MaxMind account ID>
+        geoip2_maxmind_license_key: <valid MaxMind GeoIP2 license key>
 ```
 
 ## Contributing ##
