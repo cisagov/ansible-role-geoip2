@@ -13,3 +13,4 @@
           {{ lookup('ansible.builtin.env', 'MAXMIND_ACCOUNT_ID') }}
         geoip2_maxmind_license_key: >-
           {{ lookup('ansible.builtin.env', 'MAXMIND_LICENSE_KEY') }}
+        geoip2_geoipupdate_service_name: 8421
