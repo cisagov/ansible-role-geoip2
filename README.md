@@ -30,6 +30,7 @@ None.
 | geoip2\_maxmind\_suffix\_checksum | The suffix of the database checksum file to be downloaded. | `tar.gz.sha256` | No |
 | geoip2\_maxmind\_suffix\_file | The suffix of the database file to be downloaded. | `tar.gz` | No |
 | geoip2\_maxmind\_url\_base | The format of the MaxMind URL, where the first `%s` represents `geoip2_maxmind_edition` and the second `%s` represents `geoip2_maxmind_suffix_file` or `geoip2_maxmind_suffix_checksum`. | `https://download.maxmind.com/geoip/databases/%s/download?suffix=%s` | No |
+| geoip2\_maxmind\_ansible\_use\_proxy | Whether to use a proxy when downloading from MaxMind via Ansible. | `true` | No |
 
 ## Dependencies ##
 

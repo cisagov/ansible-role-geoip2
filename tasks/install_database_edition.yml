@@ -42,7 +42,8 @@
           'url',
           checksum_url,
           username=geoip2_maxmind_account_id,
-          password=geoip2_maxmind_license_key
+          password=geoip2_maxmind_license_key,
+          use_proxy=geoip2_maxmind_ansible_use_proxy
         )
         | split
         | first

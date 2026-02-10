@@ -19,6 +19,12 @@ geoip2_maxmind_editions:
 geoip2_maxmind_suffix_file: tar.gz
 geoip2_maxmind_suffix_checksum: tar.gz.sha256
 
+# Whether to use a proxy when downloading from MaxMind in the Ansible role (using the lookup url
+# plugin). Setting this to `false` may help circumvent a bug in macOS where Python crashes when
+# using the urllib library to download files and looks up the system's proxy settings. See
+# https://github.com/ansible/ansible/issues/65108
+geoip2_maxmind_ansible_use_proxy: true
+
 # Indicate if MaxMind's geoipupdate tool (https://github.com/maxmind/geoipupdate)
 # should be installed and which version to install. Note that the version must
 # represent a release in the maxmind/geoipupdate GitHub repository.
