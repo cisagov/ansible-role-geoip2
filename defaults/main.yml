@@ -13,7 +13,8 @@ geoip2_database_directory: /usr/local/share/GeoIP/
 # https://download.maxmind.com/geoip/databases/<database edition>/download?suffix=tar.gz.sha256
 #
 # yamllint enable rule:line-length
-geoip2_maxmind_url_base: https://download.maxmind.com/geoip/databases/%s/download?suffix=%s
+geoip2_maxmind_protocol: https://
+geoip2_maxmind_url_base: download.maxmind.com/geoip/databases/%s/download?suffix=%s
 geoip2_maxmind_editions:
   - GeoIP2-City
 geoip2_maxmind_suffix_file: tar.gz
