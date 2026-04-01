@@ -36,14 +36,13 @@
 # The checksum file is in the format "checksum filename\n"
 - name: Retrieve checksum from remote URL
   ansible.builtin.uri:
-    url: "{{ geoip2_maxmind_protocol }}{{ geoip2_maxmind_account_id }}:{{ geoip2_maxmind_license_key }}@{{ checksum_url }}"
+    url: "{{ checksum_url }}"
     method: GET
     return_content: true
+    use_netrc: false
+    user: "{{ geoip2_maxmind_account_id }}"
+    password: "{{ geoip2_maxmind_license_key }}"
   register: checksum_response
-  delegate_to: localhost
-  become: false
-  run_once: true
-  no_log: true
 
 - name: Extract checksum
   ansible.builtin.set_fact:
@@ -69,7 +68,7 @@
         dest: "{{ geoip2_archive_full_path }}"
         mode: u=rw,g=r,o=r
         password: "{{ geoip2_maxmind_license_key }}"
-        url: "{{ geoip2_maxmind_protocol }}{{ database_url }}"
+        url: "{{ database_url }}"
         username: "{{ geoip2_maxmind_account_id }}"
 
     - name: Extract the database file
