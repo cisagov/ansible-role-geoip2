@@ -34,19 +34,22 @@
       }}
 
 # The checksum file is in the format "checksum filename\n"
-- name: Retrieve checksum from remote URL
-  ansible.builtin.uri:
-    url: "{{ checksum_url }}"
-    method: GET
-    return_content: true
-    use_netrc: false
-    user: "{{ geoip2_maxmind_account_id }}"
-    password: "{{ geoip2_maxmind_license_key }}"
-  register: checksum_response
+- name: Retrieve the checksum of the latest remote version of the database
+  block:
+    - name: Retrieve checksum from remote URL
+      ansible.builtin.uri:
+        force_basic_auth: true
+        method: GET
+        return_content: true
+        url: "{{ checksum_url }}"
+        url_password: "{{ geoip2_maxmind_license_key }}"
+        url_username: "{{ geoip2_maxmind_account_id }}"
+        use_netrc: false
+      register: checksum_response
 
-- name: Extract checksum
-  ansible.builtin.set_fact:
-    latest_version_checksum: "{{ checksum_response.content.split()[0] }}"
+    - name: Extract checksum from server response
+      ansible.builtin.set_fact:
+        latest_version_checksum: "{{ checksum_response.content.split()[0] }}"
 
 - name: Check if the database archive exists
   ansible.builtin.stat:
