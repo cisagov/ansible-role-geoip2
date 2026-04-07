@@ -38,7 +38,6 @@
   block:
     - name: Retrieve checksum from remote URL
       ansible.builtin.uri:
-        force_basic_auth: true
         method: GET
         return_content: true
         url: "{{ checksum_url }}"
