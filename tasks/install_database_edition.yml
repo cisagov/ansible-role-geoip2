@@ -43,7 +43,6 @@
         url: "{{ checksum_url }}"
         url_password: "{{ geoip2_maxmind_license_key }}"
         url_username: "{{ geoip2_maxmind_account_id }}"
-        use_netrc: false
       register: checksum_response
 
     - name: Extract checksum from server response
