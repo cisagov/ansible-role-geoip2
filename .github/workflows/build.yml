@@ -230,6 +230,7 @@ jobs:
         scenario:
           - default
           - install_geoipupdate
+          - install_geoipupdate_from_github
           - missing_required_variables
     steps:
       - name: Apply standard cisagov job preamble
