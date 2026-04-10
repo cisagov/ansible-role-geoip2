@@ -21,3 +21,25 @@
         # https://github.com/maxmind/geoipupdate/issues/180
         disable_gpg_check: true
         name: "{{ geoipupdate_package_url }}"
+
+- name: Set up automatic updates for GeoIP databases
+  when: geoip2_geoipupdate_auto_update
+  block:
+    - name: Write the geoipupdate systemd service file
+      ansible.builtin.template:
+        dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.service
+        mode: u=rw,g=r,o=r
+        src: geoipupdate.service.j2
+
+    - name: Write the geoipupdate systemd timer file
+      ansible.builtin.template:
+        dest: /etc/systemd/system/{{ geoip2_geoipupdate_service_name }}.timer
+        mode: u=rw,g=r,o=r
+        src: geoipupdate.timer.j2
+
+    - name: Start and enable the geoipupdate systemd timer
+      ansible.builtin.systemd:
+        daemon_reload: true
+        enabled: true
+        name: "{{ geoip2_geoipupdate_service_name }}.timer"
+        state: started
