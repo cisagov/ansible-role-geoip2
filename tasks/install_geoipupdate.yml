@@ -1,0 +1,4 @@
+---
+- name: Install geoipupdate from GitHub
+  ansible.builtin.include_tasks:
+    file: install_geoipupdate_from_github.yml

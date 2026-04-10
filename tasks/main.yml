@@ -53,6 +53,7 @@
               }}_{{ ansible_distribution_release }}.yml
             - install_geoipupdate_{{ ansible_distribution }}.yml
             - install_geoipupdate_{{ ansible_os_family }}.yml
+            - install_geoipupdate.yml
           paths:
             - "{{ role_path }}/tasks"
 
