@@ -1,4 +1,11 @@
 ---
+- name: Install the geoipupdate system package
+  when: not geoip2_install_geoipupdate_from_github
+  ansible.builtin.package:
+    name: "{{ geoipupdate_package_name }}"
+    state: present
+
 - name: Install geoipupdate from GitHub
+  when: geoip2_install_geoipupdate_from_github
   ansible.builtin.include_tasks:
     file: install_geoipupdate_from_github.yml

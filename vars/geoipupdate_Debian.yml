@@ -7,6 +7,9 @@ architectures:
   aarch64: arm64
   x86_64: amd64
 
+# The system package name to use for installation
+geoipupdate_package_name: geoipupdate
+
 # The geoipupdate package URL
 geoipupdate_package_url: >-
   https://github.com/maxmind/geoipupdate/releases/download/v{{

@@ -1,0 +1,6 @@
+---
+# There is no system package available for Debian Buster so we must install the package
+# from GitHub.
+- name: Install geoipupdate from GitHub
+  ansible.builtin.include_tasks:
+    file: install_geoipupdate_from_github.yml

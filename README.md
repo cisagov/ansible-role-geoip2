@@ -24,6 +24,7 @@ None.
 | geoip2\_geoipupdate\_service\_timer\_randomized\_delay\_sec | The time span value for the `geoipupdate` systemd timer's `RandomizedDelaySec` option. | `3h` | No |
 | geoip2\_geoipupdate\_version | The version of `geoipupdate` to install. Note that this value should be quoted and must represent a release available in the maxmind/geoipupdate GitHub repository. | `"7.0.1"` | No |
 | geoip2\_install\_geoipupdate | Whether to install the `geoipupdate` tool. | `false` | No |
+| geoip2\_install\_geoipupdate\_from\_github | Install the `geoipupdate` tool from GitHub instead of the system package (if available). | `false` | No |
 | geoip2\_maxmind\_account\_id | The MaxMind account ID to use when accessing the MaxMind servers. | n/a | Yes |
 | geoip2\_maxmind\_editions | The list of database editions to install. | `[GeoIP2-City]` | No |
 | geoip2\_maxmind\_license\_key | The MaxMind GeoIP2 license key to use when accessing the MaxMind servers. | n/a | Yes |

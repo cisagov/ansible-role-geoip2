@@ -23,6 +23,9 @@ geoip2_maxmind_suffix_checksum: tar.gz.sha256
 # should be installed and which version to install. Note that the version must
 # represent a release in the maxmind/geoipupdate GitHub repository.
 geoip2_install_geoipupdate: false
+# Install the `geoipupdate` tool from GitHub instead of the system package (if
+# available).
+geoip2_install_geoipupdate_from_github: false
 # We do not want this to be treated as a numeric value so we quote it to ensure
 # it is treated as a string.
 geoip2_geoipupdate_version: 7.0.1
