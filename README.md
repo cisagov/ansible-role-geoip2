@@ -16,7 +16,7 @@ None.
 ## Role Variables ##
 
 | Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
+| -------- | ----------- | ------- | -------- |
 | geoip2\_database\_directory | The directory in which to store the database files. | `/usr/local/share/GeoIP/` | No |
 | geoip2\_geoipupdate\_auto\_update | Whether to configure automatic updates when `geoipupdate` is installed. | `true` | No |
 | geoip2\_geoipupdate\_service\_name | The name to use for the `geoipupdate` systemd service and timer. | `geoipupdate` | No |
