@@ -38,6 +38,12 @@
   block:
     - name: Retrieve checksum from remote URL
       ansible.builtin.uri:
+        # MaxMind serves downloads via Cloudflare R2 presigned URLs whose
+        # signature covers the x-amz-checksum-mode header. The signed value is
+        # "ENABLED" (what the AWS SDK / geoipupdate sends), so we must replay it
+        # or R2 rejects the request with a SignatureDoesNotMatch 403.
+        headers:
+          x-amz-checksum-mode: ENABLED
         method: GET
         return_content: true
         url: "{{ checksum_url }}"
@@ -67,6 +73,10 @@
       ansible.builtin.get_url:
         checksum: sha256:{{ latest_version_checksum }}
         dest: "{{ geoip2_archive_full_path }}"
+        # See the note on the checksum task above: R2 presigned URLs sign the
+        # x-amz-checksum-mode header, so it must be sent with value "ENABLED".
+        headers:
+          x-amz-checksum-mode: ENABLED
         mode: u=rw,g=r,o=r
         password: "{{ geoip2_maxmind_license_key }}"
         url: "{{ database_url }}"
