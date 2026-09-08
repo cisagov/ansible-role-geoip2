@@ -13,3 +13,26 @@
           {{ lookup('ansible.builtin.env', 'MAXMIND_ACCOUNT_ID') }}
         geoip2_maxmind_license_key: >-
           {{ lookup('ansible.builtin.env', 'MAXMIND_LICENSE_KEY') }}
+        # When the workflow has prefetched the databases it serves them over
+        # HTTP from the runner, and we point the role at those copies rather
+        # than at MaxMind. This stops the whole test matrix from each
+        # downloading its own copies against an organization-wide account that
+        # MaxMind caps at 1,000 downloads per 24 hours. See the
+        # prefetch-database job in .github/workflows/build.yml.
+        geoip2_maxmind_url_base: >-
+          {{
+            'http://' ~ geoip2_test_cache_host ~ ':' ~ geoip2_test_cache_port
+            ~ '/%s.%s'
+            if geoip2_test_use_local_cache
+            else 'https://download.maxmind.com/geoip/databases/%s/download?suffix=%s'
+          }}
+        # A Molecule container reaches the runner through its default gateway,
+        # which is the runner's Docker bridge address.
+        geoip2_test_cache_host: >-
+          {{ ansible_default_ipv4.gateway | default('172.17.0.1', true) }}
+        geoip2_test_cache_port: >-
+          {{ lookup('ansible.builtin.env', 'GEOIP2_CACHE_PORT')
+             | default('8099', true) }}
+        geoip2_test_use_local_cache: >-
+          {{ lookup('ansible.builtin.env', 'GEOIP2_USE_LOCAL_CACHE')
+             | default('false', true) | bool }}
