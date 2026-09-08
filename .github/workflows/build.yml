@@ -264,8 +264,8 @@ jobs:
           # in a given day reuse one set of downloads. The digest of the edition
           # list is included so that adding or removing an edition cannot reuse
           # a cache that is missing it.
-          digest=$(printf '%s' "$editions" | sha256sum | cut -c1-12)
-          echo "key=maxmind-${digest}-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          digest=$(printf '%s' "$editions" | sha256sum | cut --characters 1-12)
+          echo "key=maxmind-${digest}-$(date --utc +%Y%m%d)" >> "$GITHUB_OUTPUT"
       - id: cache
         uses: actions/cache@v5
         with:
@@ -278,7 +278,7 @@ jobs:
           MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
           MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
         run: |
-          mkdir -p maxmind-cache
+          mkdir --parents maxmind-cache
           for edition in $EDITIONS; do
             url_base=https://download.maxmind.com/geoip/databases/$edition/download
             for suffix in tar.gz tar.gz.sha256; do

@@ -143,11 +143,11 @@ jobs:
           fi
           # Pull just the one query parameter. The rest of the redirect URL
           # carries the access key ID and signature and is not logged.
-          signed=$(tr -d '\r' < "$headers" \
+          signed=$(tr --delete '\r' < "$headers" \
             | awk 'tolower($1)=="location:"{print $2}' \
             | tr '&' '\n' \
             | grep --ignore-case --max-count 1 '^X-Amz-SignedHeaders=' \
-            | cut -d= -f2- || true)
+            | cut --delimiter='=' --fields=2- || true)
           if [ -z "$signed" ]; then
             echo "::error::Could not find X-Amz-SignedHeaders in the redirect" \
               "URL that MaxMind returned."
