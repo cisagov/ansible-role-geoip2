@@ -8,7 +8,13 @@ on:  # yamllint disable-line rule:truthy
   # We use the default activity types for the pull_request event as specified here:
   # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
   pull_request:
+  # Pushes to a branch with an open pull request are already covered by the
+  # pull_request event above. Without this filter both events fire for the same
+  # commit, running the entire test matrix twice and needlessly doubling the
+  # requests made to a MaxMind account that is shared across the organization.
   push:
+    branches:
+      - develop
   repository_dispatch:
     types:
       - apb
@@ -22,6 +28,9 @@ defaults:
     shell: bash -Eueo pipefail -x {0}
 
 env:
+  # The port on which each test job serves the prefetched MaxMind database to
+  # its Molecule containers. See the prefetch-database job below.
+  GEOIP2_CACHE_PORT: 8099
   PIP_CACHE_DIR: ~/.cache/pip
   PRE_COMMIT_CACHE_DIR: ~/.cache/pre-commit
   RUN_TMATE: ${{ secrets.RUN_TMATE }}
@@ -203,12 +212,115 @@ jobs:
       - name: Setup tmate debug session
         uses: mxschmitt/action-tmate@v3
         if: env.RUN_TMATE
+  # Download each MaxMind database named in geoip2_maxmind_editions, along with
+  # its checksum, exactly once, then share them with every test job through the
+  # Actions cache.
+  #
+  # Previously each test job downloaded its own copies, so a single workflow run
+  # made roughly one hundred requests to MaxMind. The credentials are
+  # organization-level secrets shared by every cisagov repository, and MaxMind
+  # caps an account at 1,000 database downloads per 24 hours, so that volume is
+  # worth avoiding. MaxMind also recommends downloading to a local repository
+  # and distributing from there rather than fetching per host.
+  prefetch-database:
+    name: Prefetch MaxMind databases
+    needs:
+      - diagnostics
+    permissions:
+      # actions/checkout needs this to fetch code
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.editions.outputs.key }}
+      editions: ${{ steps.editions.outputs.list }}
+    steps:
+      - name: Apply standard cisagov job preamble
+        uses: cisagov/action-job-preamble@v1
+        with:
+          monitor_permissions: "false"
+          permissions_monitoring_config: ${{ vars.ACTIONS_PERMISSIONS_CONFIG }}
+      - id: checkout-repo
+        name: Checkout the repository
+        uses: actions/checkout@v6
+      - id: editions
+        name: Determine the database editions and cache key
+        run: |
+          # geoip2_maxmind_editions in defaults/main.yml is the single source of
+          # truth for which databases this role installs, so read the list from
+          # there instead of duplicating it here. Note that yq is preinstalled
+          # on the Ubuntu runner images, and that it exits non-zero when the key
+          # is absent, which the emptiness check below also covers.
+          editions=$(yq '.geoip2_maxmind_editions | join(" ")' \
+            defaults/main.yml || true)
+          if [ -z "$editions" ]; then
+            echo "::error::Could not read a non-empty geoip2_maxmind_editions" \
+              "from defaults/main.yml."
+            exit 1
+          fi
+          echo "Editions: $editions"
+          echo "list=$editions" >> "$GITHUB_OUTPUT"
+          # MaxMind publishes new databases on Tuesdays and Fridays, so a daily
+          # key keeps the cached copies reasonably fresh while letting every run
+          # in a given day reuse one set of downloads. The digest of the edition
+          # list is included so that adding or removing an edition cannot reuse
+          # a cache that is missing it.
+          digest=$(printf '%s' "$editions" | sha256sum | cut --characters 1-12)
+          echo "key=maxmind-${digest}-$(date --utc +%Y%m%d)" >> "$GITHUB_OUTPUT"
+      - id: cache
+        uses: actions/cache@v5
+        with:
+          key: ${{ steps.editions.outputs.key }}
+          path: maxmind-cache
+      - name: Download the databases and checksums from MaxMind
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          EDITIONS: ${{ steps.editions.outputs.list }}
+          MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
+          MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
+        run: |
+          mkdir --parents maxmind-cache
+          for edition in $EDITIONS; do
+            url_base=https://download.maxmind.com/geoip/databases/$edition/download
+            for suffix in tar.gz tar.gz.sha256; do
+              # Do not add x-amz-* headers here. MaxMind redirects to a
+              # Cloudflare R2 presigned URL, and SigV4 requires every x-amz-*
+              # header sent to be listed in that URL's X-Amz-SignedHeaders; R2
+              # rejects anything else with a SignatureDoesNotMatch 403. See the
+              # note in tasks/install_database_edition.yml. Retries are used
+              # because this is the only place the workflow talks to MaxMind.
+              curl --fail --silent --show-error --location \
+                --retry 5 --retry-delay 15 --retry-all-errors \
+                --user "${MAXMIND_ACCOUNT_ID}:${MAXMIND_LICENSE_KEY}" \
+                --output "maxmind-cache/${edition}.${suffix}" \
+                "${url_base}?suffix=${suffix}"
+            done
+          done
+      - name: Verify each cached archive matches its cached checksum
+        env:
+          EDITIONS: ${{ steps.editions.outputs.list }}
+        run: |
+          cd maxmind-cache
+          for edition in $EDITIONS; do
+            # A checksum file holds "<sha256>  <dated filename>". The role only
+            # consumes the hash, and the filename will not match the name we
+            # cache under, so compare hashes directly rather than using
+            # sha256sum --check.
+            expected=$(awk '{print $1}' "${edition}.tar.gz.sha256")
+            actual=$(sha256sum "${edition}.tar.gz" | awk '{print $1}')
+            if [ "$expected" != "$actual" ]; then
+              echo "::error::Cached ${edition} archive does not match its" \
+                "cached checksum."
+              exit 1
+            fi
+            echo "Verified cached ${edition}: $actual"
+          done
   test:
     name: >-
       test (${{ matrix.scenario }}) -
       ${{ matrix.platform }}-${{ matrix.architecture }}
     needs:
       - diagnostics
+      - prefetch-database
     permissions:
       # actions/checkout needs this to fetch code
       contents: read
@@ -305,8 +417,64 @@ jobs:
       # before running Molecule tests.
       - name: Disable AppArmor
         uses: cisagov/action-disable-apparmor@v1
+      - id: database-source
+        name: Determine whether this job uses the prefetched databases
+        # One job is deliberately left downloading straight from MaxMind so
+        # that CI keeps exercising the real Cloudflare R2 presigned-URL path.
+        # MaxMind has changed which headers those URLs are signed with before
+        # now, and serving every job from the cache would hide such a change
+        # until it broke a production build. The missing_required_variables
+        # scenario fails before it downloads anything, so it needs neither the
+        # cache nor the server.
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+          PLATFORM: ${{ matrix.platform }}
+          SCENARIO: ${{ matrix.scenario }}
+        run: |
+          this=$SCENARIO/$PLATFORM/$ARCHITECTURE
+          if [ "$this" = default/debian12-systemd/amd64 ] \
+            || [ "$SCENARIO" = missing_required_variables ]
+          then
+            echo "use-cache=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "use-cache=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Restore the prefetched MaxMind databases
+        if: steps.database-source.outputs.use-cache == 'true'
+        uses: actions/cache/restore@v5
+        with:
+          fail-on-cache-miss: true
+          key: ${{ needs.prefetch-database.outputs.cache-key }}
+          path: maxmind-cache
+      - name: Serve the prefetched databases to the Molecule containers
+        if: steps.database-source.outputs.use-cache == 'true'
+        # The containers reach this server via their default gateway, which is
+        # the Docker bridge address of this runner.
+        env:
+          EDITIONS: ${{ needs.prefetch-database.outputs.editions }}
+        run: |
+          nohup python3 -m http.server "$GEOIP2_CACHE_PORT" \
+            --bind 0.0.0.0 --directory maxmind-cache \
+            > /tmp/geoip2-cache-server.log 2>&1 &
+          # Confirm every edition is actually being served before Molecule runs,
+          # so that a problem here is not later misreported as a MaxMind
+          # download failure. The server is backgrounded above and takes a
+          # moment to bind, hence the retries; --retry-connrefused is needed
+          # because --retry on its own does not retry a refused connection.
+          for edition in $EDITIONS; do
+            if ! curl --fail --silent --output /dev/null \
+              --retry 10 --retry-delay 1 --retry-connrefused \
+              "http://127.0.0.1:$GEOIP2_CACHE_PORT/${edition}.tar.gz.sha256"
+            then
+              echo "Database cache server is not serving ${edition}" >&2
+              cat /tmp/geoip2-cache-server.log >&2
+              exit 1
+            fi
+          done
+          echo "Database cache server is serving: $EDITIONS"
       - name: Run molecule tests
         env:
+          GEOIP2_USE_LOCAL_CACHE: ${{ steps.database-source.outputs.use-cache }}
           MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
           MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
         run: >-

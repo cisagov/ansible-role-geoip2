@@ -1,0 +1,182 @@
+---
+name: maxmind-canary
+
+on:  # yamllint disable-line rule:truthy
+  # Run daily so that a change in how MaxMind signs its database download URLs
+  # surfaces here instead of in a downstream image build. MaxMind changed the
+  # signed header set twice in three days at the end of August 2026, and the
+  # only reason we found out was that production Packer builds started failing.
+  # See the comment in tasks/install_database_edition.yml for that history.
+  schedule:
+    - cron: 23 11 * * *
+  # Run when this workflow itself changes so that it is never merged broken, and
+  # when the role defaults change, since the edition checked below is read from
+  # them.
+  push:
+    paths:
+      - .github/workflows/maxmind-canary.yml
+      - defaults/main.yml
+  # Allow a run on demand, which is useful when investigating a download
+  # failure reported against this role.
+  workflow_dispatch:
+
+# Set a default shell for any run steps. The `-Eueo pipefail` sets errtrace,
+# nounset, errexit, and pipefail. The `-x` will print all commands as they are
+# run. Please see the GitHub Actions documentation for more information:
+# https://docs.github.com/en/actions/using-jobs/setting-default-values-for-jobs
+defaults:
+  run:
+    shell: bash -Eueo pipefail -x {0}
+
+jobs:
+  diagnostics:
+    name: Run diagnostics
+    # This job does not need any permissions
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      # Note that a duplicate of this step must be added at the top of
+      # each job.
+      - name: Apply standard cisagov job preamble
+        uses: cisagov/action-job-preamble@v1
+        with:
+          check_github_status: "true"
+          # This functionality is poorly implemented and has been
+          # causing problems due to the MITM implementation hogging or
+          # leaking memory.  As a result we disable it by default.  If
+          # you want to temporarily enable it, simply set
+          # monitor_permissions equal to "true".
+          #
+          # TODO: Re-enable this functionality when practical.  See
+          # cisagov/skeleton-generic#207 for more details.
+          monitor_permissions: "false"
+          output_workflow_context: "true"
+          # Use a variable to specify the permissions monitoring
+          # configuration. By default this will yield the
+          # configuration stored in the cisagov organization-level
+          # variable, but if you want to use a different configuration
+          # then simply:
+          # 1. Create a repository-level variable with the name
+          # ACTIONS_PERMISSIONS_CONFIG.
+          # 2. Set this new variable's value to the configuration you
+          # want to use for this repository.
+          #
+          # Note in particular that changing the permissions
+          # monitoring configuration *does not* require you to modify
+          # this workflow.
+          permissions_monitoring_config: ${{ vars.ACTIONS_PERMISSIONS_CONFIG }}
+  canary:
+    name: Check MaxMind download URL signing
+    needs:
+      - diagnostics
+    permissions:
+      # actions/checkout needs this to fetch code
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply standard cisagov job preamble
+        uses: cisagov/action-job-preamble@v1
+        with:
+          # This functionality is poorly implemented and has been
+          # causing problems due to the MITM implementation hogging or
+          # leaking memory.  As a result we disable it by default.  If
+          # you want to temporarily enable it, simply set
+          # monitor_permissions equal to "true".
+          #
+          # TODO: Re-enable this functionality when practical.  See
+          # cisagov/skeleton-generic#207 for more details.
+          monitor_permissions: "false"
+          # Use a variable to specify the permissions monitoring
+          # configuration. By default this will yield the
+          # configuration stored in the cisagov organization-level
+          # variable, but if you want to use a different configuration
+          # then simply:
+          # 1. Create a repository-level variable with the name
+          # ACTIONS_PERMISSIONS_CONFIG.
+          # 2. Set this new variable's value to the configuration you
+          # want to use for this repository.
+          #
+          # Note in particular that changing the permissions
+          # monitoring configuration *does not* require you to modify
+          # this workflow.
+          permissions_monitoring_config: ${{ vars.ACTIONS_PERMISSIONS_CONFIG }}
+      - id: checkout-repo
+        name: Checkout the repository
+        uses: actions/checkout@v6
+      - id: edition
+        name: Determine which database edition to check
+        run: |
+          # The checks below inspect how MaxMind signs its download URLs, which
+          # is not specific to a database, so the first edition is enough. Read
+          # it from geoip2_maxmind_editions in defaults/main.yml rather than
+          # hardcoding it, so this stays in step with what the role installs.
+          # Note that yq is preinstalled on the Ubuntu runner images, and that
+          # --exit-status makes it fail if the key is absent or the list empty.
+          if ! edition=$(yq --exit-status '.geoip2_maxmind_editions[0]' \
+            defaults/main.yml); then
+            echo "::error::Could not read geoip2_maxmind_editions from" \
+              "defaults/main.yml."
+            exit 1
+          fi
+          echo "Checking edition: $edition"
+          echo "name=$edition" >> "$GITHUB_OUTPUT"
+      - name: Verify MaxMind still signs only the host header
+        env:
+          EDITION: ${{ steps.edition.outputs.name }}
+          MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
+          MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
+        run: |
+          url=https://download.maxmind.com/geoip/databases/$EDITION/download
+          headers=$(mktemp)
+          # --max-redirs 0 stops at MaxMind's redirect, so the object is never
+          # fetched and this check costs nothing against the account's download
+          # cap.
+          code=$(curl --silent --show-error --output /dev/null \
+            --dump-header "$headers" --max-redirs 0 --write-out '%{http_code}' \
+            --user "${MAXMIND_ACCOUNT_ID}:${MAXMIND_LICENSE_KEY}" \
+            "${url}?suffix=tar.gz.sha256")
+          if [ "$code" != 302 ]; then
+            echo "::error::Expected a 302 from MaxMind but got ${code}. The" \
+              "credentials may be invalid or the account may have lost access" \
+              "to ${EDITION}."
+            exit 1
+          fi
+          # Pull just the one query parameter. The rest of the redirect URL
+          # carries the access key ID and signature and is not logged.
+          signed=$(tr --delete '\r' < "$headers" \
+            | awk 'tolower($1)=="location:"{print $2}' \
+            | tr '&' '\n' \
+            | grep --ignore-case --max-count 1 '^X-Amz-SignedHeaders=' \
+            | cut --delimiter='=' --fields=2- || true)
+          if [ -z "$signed" ]; then
+            echo "::error::Could not find X-Amz-SignedHeaders in the redirect" \
+              "URL that MaxMind returned."
+            exit 1
+          fi
+          echo "X-Amz-SignedHeaders=${signed}"
+          if [ "$signed" != host ]; then
+            echo "::error::MaxMind is signing '${signed}' rather than 'host'." \
+              "Requests from this role may now need matching x-amz-* headers." \
+              "See the comment in tasks/install_database_edition.yml."
+            exit 1
+          fi
+      - name: Verify the checksum downloads with no extra headers
+        env:
+          EDITION: ${{ steps.edition.outputs.name }}
+          MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
+          MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
+        run: |
+          url=https://download.maxmind.com/geoip/databases/$EDITION/download
+          # This deliberately sends no x-amz-* headers, matching what the role
+          # does. The tar.gz.sha256 suffix keeps the response under 100 bytes
+          # rather than pulling down the whole database.
+          code=$(curl --silent --show-error --location --output /dev/null \
+            --write-out '%{http_code}' \
+            --user "${MAXMIND_ACCOUNT_ID}:${MAXMIND_LICENSE_KEY}" \
+            "${url}?suffix=tar.gz.sha256")
+          if [ "$code" != 200 ]; then
+            echo "::error::Downloading the checksum with no extra headers" \
+              "returned ${code}, but the role relies on that working."
+            exit 1
+          fi
+          echo "Checksum download succeeded with no extra headers."

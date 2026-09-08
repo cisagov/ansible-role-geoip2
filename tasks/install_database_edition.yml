@@ -34,6 +34,17 @@
       }}
 
 # The checksum file is in the format "checksum filename\n"
+#
+# Do not add x-amz-* headers to the two requests below. MaxMind redirects these
+# URLs to a Cloudflare R2 presigned URL, and SigV4 requires that every x-amz-*
+# header sent be listed in that URL's X-Amz-SignedHeaders. R2 folds any
+# unlisted x-amz-* header into the signature it computes, so sending one that
+# MaxMind did not sign fails with a SignatureDoesNotMatch 403.
+#
+# For a few days at the end of August 2026 MaxMind signed
+# x-amz-checksum-mode=ENABLED into these URLs, which broke these tasks until
+# the header was replayed. MaxMind has since gone back to signing only the host
+# header, so no extra headers are needed here.
 - name: Retrieve the checksum of the latest remote version of the database
   block:
     - name: Retrieve checksum from remote URL
